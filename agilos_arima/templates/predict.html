@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Forecast</h1>
+
+    <form method="POST" action="{% url 'predict' %}">
+        {% csrf_token %}
+        <!-- Hidden input to determine the action (predict) -->
+        <input type="hidden" id="action" name="action" value="">
+
+        <div class="mb-3 w-25">
+            <label for="steps" class="form-label">Number of Forecast Steps</label>
+            <input type="number" name="steps" id="steps" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <!-- Predict button in a similar style to Analyze -->
+            <button type="button" class="btn btn-primary me-2" onclick="submitForm('predict')">Predict</button>
+        </div>
+    </form>
+
+    <div id="result">
+        <!-- Display the forecast plot if available -->
+        {% if plot_html %}
+            <div class="mt-4">{{ plot_html|safe }}</div>
+        <!-- Add a Download CSV button once the forecast is generated -->
+            <form method="POST" action="{% url 'predict' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="download_csv">
+                <button type="submit" class="btn btn-success mt-3">Download CSV</button>
+            </form>
+        {% elif error %}
+            <!-- Show error messages if there are any -->
+            <div class="alert alert-danger mt-4">{{ error }}</div>
+        {% else %}
+            <p>Please enter the number of steps and click 'Predict' to generate a forecast.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function submitForm(actionType) {
+        document.getElementById('action').value = actionType;
+        document.forms[0].submit();
+    }
+</script>
+{% endblock %}

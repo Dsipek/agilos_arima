@@ -1,0 +1,21 @@
+.navbar {
+    background-color: #5271ff; /* Custom background color */
+}
+
+.navbar a.nav-link {
+    color: white; /* Ensure the link color contrasts with the navbar background */
+}
+
+.navbar a.nav-link:hover {
+    color: #f0f0f0; /* Optional: Slightly lighter color on hover */
+}
+
+.navbar .navbar-brand {
+    color: white; /* Set text color to white */
+    text-decoration: none; /* Remove underline */
+}
+
+.navbar .navbar-brand:hover {
+    color: #e0e0e0; /* Optional: Change color on hover for better visibility */
+    text-decoration: none; /* Ensure no underline on hover */
+}

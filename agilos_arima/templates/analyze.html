@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Analysis</h1>
+
+    <form method="POST" action="{% url 'analyze' %}">
+        {% csrf_token %}
+        <!-- Hidden input to determine which button was pressed -->
+        <input type="hidden" id="action" name="action" value="">
+
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary me-2" onclick="submitForm('show_graph')">Show Graph</button>
+            <button type="button" class="btn btn-primary me-2" onclick="submitForm('show_error')">Show RMSE/MAE</button>
+            <button type="button" class="btn btn-primary me-2" onclick="submitForm('show_residuals_autocorr')">Residuals Autocorrelation</button>
+            <button type="button" class="btn btn-primary me-2" onclick="submitForm('show_residuals_histogram')">Residuals Histogram</button>
+            <button type="button" class="btn btn-primary me-2" onclick="submitForm('show_ljung_box')">Ljung-Box Test</button>
+        </div>
+    </form>
+
+    <div id="result">
+        <!-- This will display either the graph or the RMSE/MAE table -->
+        
+        {% if plot_html %}
+            {{ plot_html|safe }}
+        {% elif rmse and mae %}
+            <h3>RMSE and MAE Results</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>RMSE</td>
+                        <td>{{ rmse }}</td>
+                    </tr>
+                    <tr>
+                        <td>MAE</td>
+                        <td>{{ mae }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        {% elif plot_html_acf and plot_html_pacf %}
+            <div class="mt-4">
+                {{ plot_html_acf|safe }}
+            </div>
+            <div class="mt-4">
+                {{ plot_html_pacf|safe }}
+            </div>
+     
+        {% elif ljung_box_results %}
+            <h3>Ljung-Box Test Results</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Lag</th>
+                        <th>Ljung-Box Statistic</th>
+                        <th>p-value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in ljung_box_results %}
+                        <tr>
+                            <td>{{ result.lag }}</td>  <!-- Accessing the lag -->
+                            <td>{{ result.lb_stat|floatformat:2 }}</td>  <!-- Statistic formatted to 2 decimal places -->
+                            <td>{{ result.lb_pvalue|floatformat:4 }}</td>  <!-- p-value formatted to 4 decimal places -->
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3">No results available.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Please select an option.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function submitForm(actionType) {
+        document.getElementById('action').value = actionType;
+        document.forms[0].submit();
+    }
+</script>
+</body>
+</html>
+{% endblock %}
+
